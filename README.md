@@ -2,14 +2,14 @@
 ## Production-Grade Multi-Tenant RAG System
 
 ### 1. Project Overview
-A retrieval-augmented generation (RAG) platform designed for SDE II-level demonstration. The system enables multiple users to upload private documents and query them via an LLM, ensuring strict data isolation, real-time streaming, and automated infrastructure.
+A retrieval-augmented generation (RAG) platform. The system enables multiple users to upload private documents and query them via an LLM, ensuring strict data isolation, real-time streaming, and automated infrastructure.
 
 ---
 
 ### 2. Functional Requirements
 
 #### 2.1 Multi-Tenant Ingestion (The "Write" Path)
-- **Document Support:** Support for `.pdf` and `.md` file formats.
+- **Document Support:** Support for `.pdf` file formats.
 - **Tenant Isolation:** Every document must be associated with a `tenant_id`.
 - **Text Processing:**
     - Clean and normalize extracted text.
