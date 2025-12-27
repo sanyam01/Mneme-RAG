@@ -67,3 +67,47 @@ A retrieval-augmented generation (RAG) platform. The system enables multiple use
 - **Database:** PostgreSQL + pgvector.
 - **Inference:** Ollama or vLLM (Qwen 2.5 7B model).
 - **DevOps:** Docker, GitHub Actions, Maven.
+
+Here is the full source text for a professional, senior-level README.md for your project. You can copy and paste this directly into your file.
+
+Markdown
+
+# Mneme-RAG: Multi-Tenant Retrieval-Augmented Generation
+
+**Mneme-RAG** is a production-grade RAG platform designed for strict data isolation, conversational continuity, and high-performance local inference. It leverages **Java 21 (Spring Boot)** and **React** to provide a secure, scalable, and real-time document-chat experience.
+
+---
+
+## 🏗 System Architecture
+
+The project implements a decoupled, three-tier architecture to ensure clear separation of concerns and robust data boundaries.
+
+### 1. The Client Layer (React Frontend)
+A lightweight frontend focusing on **Interaction and Presentation**:
+* **Multi-Format Ingestion**: Supports uploading `.pdf` and `.md` files for ingestion.
+* **JWT-Based Security**: Automatically attaches an authentication token (containing the `tenant_id`) to every request header to enforce security at the gateway.
+* **Real-time UX**: Implements a **Server-Sent Events (SSE)** listener to render incoming LLM tokens instantly, providing a fluid chat experience.
+* **Thin State**: Maintains only the current UI state; all long-term conversational history is managed by the backend to ensure consistency across sessions.
+
+### 2. The Service Layer (Spring Boot Orchestrator)
+The core logic center where **Contextual Orchestration** and **State Management** reside:
+* **Security Filter**: Extracts the `tenant_id` from secure JWTs to provide row-level isolation in all database transactions.
+* **Persistent Chat Memory**: Retrieves the last 10 messages from **Postgres** based on `chat_id` and `tenant_id` to maintain context during the conversation.
+* **Retrieval Service**: Vectorizes user queries and performs semantic searches on the **pgvector** store, utilizing strict metadata filtering (`WHERE tenant_id = ?`).
+* **Prompt Augmentation**: Merges retrieved document context, conversation history, and the latest user question into a single, grounded prompt for the LLM.
+
+### 3. The Inference & Data Layer (Backend Services)
+* **Postgres + pgvector**: A unified source of truth for persistent document vectors, associated metadata, and chat history.
+* **Local Inference (Qwen 2.5)**: Uses **Ollama** or **vLLM** to generate responses locally, ensuring high privacy and zero external API costs.
+
+---
+
+## 🔄 Detailed Data Flow (The "Read" Path)
+
+
+
+1.  **Request & Auth**: The user sends a chat message. The system pulls the `tenant_id` from a secure JWT to verify identity.
+2.  **Semantic Retrieval**: Spring Boot converts the query into a vector and searches **pgvector** for the most relevant private documents.
+3.  **Memory Load**: The system fetches the rolling conversation window from the `Chat History` table.
+4.  **Generation**: The **Qwen 2.5** model processes the augmented prompt (Context + History + Question).
+5.  **SSE Streaming**: Each generated token is streamed back to the React UI in real-time.
