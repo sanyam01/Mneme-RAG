@@ -68,16 +68,6 @@ A retrieval-augmented generation (RAG) platform. The system enables multiple use
 - **Inference:** Ollama or vLLM (Qwen 2.5 7B model).
 - **DevOps:** Docker, GitHub Actions, Maven.
 
-Here is the full source text for a professional, senior-level README.md for your project. You can copy and paste this directly into your file.
-
-Markdown
-
-# Mneme-RAG: Multi-Tenant Retrieval-Augmented Generation
-
-**Mneme-RAG** is a production-grade RAG platform designed for strict data isolation, conversational continuity, and high-performance local inference. It leverages **Java 21 (Spring Boot)** and **React** to provide a secure, scalable, and real-time document-chat experience.
-
----
-
 ## 🏗 System Architecture
 
 The project implements a decoupled, three-tier architecture to ensure clear separation of concerns and robust data boundaries.
