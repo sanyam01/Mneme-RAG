@@ -1,0 +1,73 @@
+services:
+  # 1. Vector + relation db
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: rag_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: rag_user
+      POSTGRES_PASSWORD: rag_password
+      POSTGRES_DB: rag_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+  
+  # NEW: The Automation Worker
+  ollama-pull-models:
+    image: curlimages/curl:latest
+    container_name: ollama_provisioner
+    depends_on:
+      - ollama
+    # This script waits for Ollama to be ready, then tells it to pull the models
+    command: >
+      sh -c "
+      echo 'Waiting for Ollama to start...';
+      sleep 10;
+      curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"llama3.2\"}';
+      curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"nomic-embed-text\"}';
+      echo 'Models pulled successfully!';"
+  
+  vllm:
+    image: vllm/vllm-openai:latest
+    volumes:
+      # Map a local folder containing the model weights
+      - ./models/llama3-2:/models/llama3-2
+    command: --model /models/llama3-2
+
+  # 4. Your Java Backend (Built via Maven)
+  app:
+    build: .
+    container_name: resume-rag-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db: 
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rag_db
+      SPRING_DATASOURCE_USERNAME: rag_user
+      SPRING_DATASOURCE_PASSWORD: rag_password
+      # Switchable Provider Logic
+      RAG_PROVIDER: ollama  # Set to 'vllm' to switch the logic
+      OLLAMA_BASE_URL: http://rag_ollama:11434
+      VLLM_BASE_URL: http://rag_vllm:8000/v1
+
+volumes:
+  postgres_data:
+  ollama_data:
+
