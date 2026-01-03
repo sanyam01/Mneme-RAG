@@ -38,7 +38,7 @@ services:
     #           capabilities: [gpu]
     # restart: unless-stopped
   
-  # NEW: The Automation Worker
+  # The Automation Worker
   ollama-pull-models:
     image: curlimages/curl:latest
     container_name: ollama_provisioner
@@ -53,12 +53,12 @@ services:
       curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"nomic-embed-text\"}';
       echo 'Models pulled successfully!';"
   
-  vllm:
-    image: vllm/vllm-openai:latest
-    volumes:
-      # Map a local folder containing the model weights
-      - ./models/llama3-2:/models/llama3-2
-    command: --model /models/llama3-2
+  # vllm:
+  #   image: vllm/vllm-openai:latest
+  #   volumes:
+  #     # Map a local folder containing the model weights
+  #     - ./models/llama3-2:/models/llama3-2
+  #   command: --model /models/llama3-2
 
   # 4. Your Java Backend (Built via Maven)
   app:
