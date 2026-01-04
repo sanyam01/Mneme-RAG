@@ -1,6 +1,10 @@
 package com.mneme.rag.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "resume_chunks")
@@ -10,16 +14,15 @@ import jakarta.persistence.*;
 @AllArgsConstructor
 public class ResumeChunk {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY);
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+  @Column(columnDefinition = "TEXT")
+  private String content;
 
-    private String fileName;
+  private String fileName;
 
-    @Column(name = "embedding", columnDefinition="vector(768)")
-    private float[] embedding;
-
+  @Column(name = "embedding", columnDefinition = "vector(768)")
+  private float[] embedding;
 }
