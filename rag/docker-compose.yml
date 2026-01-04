@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: rag_password
       POSTGRES_DB: rag_db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rag_user"]
+      test: ["CMD-SHELL", "pg_isready -U rag_user -d rag_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,7 +72,7 @@ services:
       ollama:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rag_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rag_db:5432/rag_db
       SPRING_DATASOURCE_USERNAME: rag_user
       SPRING_DATASOURCE_PASSWORD: rag_password
       # Switchable Provider Logic
