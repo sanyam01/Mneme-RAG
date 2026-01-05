@@ -3,25 +3,49 @@ package com.mneme.rag.repository;
 import com.mneme.rag.model.ResumeChunk;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface ResumeRepository extends JpaRepository<ResumeChunk, Long> {
 
-  /**
-   * Similarity Search using Euclidean distance (<->). 1. We take the query embedding from the user.
-   * 2. We compare it against all stored embeddings in the table. 3. We sort by the smallest
-   * distance (highest similarity). 4. We limit to the top 'limit' results to avoid overwhelming the
-   * AI.
-   */
-  @Query(
-      value =
-          "SELECT * FROM resume_chunks "
-              + "ORDER BY embedding <-> CAST(:queryEmbedding AS vector) "
-              + "LIMIT :limit",
-      nativeQuery = true)
-  List<ResumeChunk> findSimilarChunks(
-      @Param("queryEmbedding") float[] queryEmbedding, @Param("limit") int limit);
+    /**
+     * NATIVE INSERT: Bypasses Hibernate's bytea mapping by casting the float[] 
+     * directly to the PostgreSQL vector type.
+     */
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO resume_chunks (content, file_name, embedding) " +
+                   "VALUES (:content, :fileName, CAST(:embedding AS vector))", 
+           nativeQuery = true)
+    void insertChunk(@Param("content") String content, 
+                     @Param("fileName") String fileName, 
+                     @Param("embedding") float[] embedding);
+
+    /**
+     * NATIVE SEARCH: Returns full objects. 
+     * Note: This might still trigger a 'No results' error on the 'embedding' field 
+     * if the Hibernate mapping isn't perfect.
+     */
+    @Query(value = "SELECT * FROM resume_chunks " +
+                   "ORDER BY embedding <-> CAST(:queryEmbedding AS vector) " +
+                   "LIMIT :limit", 
+           nativeQuery = true)
+    List<ResumeChunk> findSimilarChunks(@Param("queryEmbedding") float[] queryEmbedding, 
+                                        @Param("limit") int limit);
+
+    /**
+     * SAFER SEARCH: Returns only the text content.
+     * This is the recommended way for RAG because it avoids mapping the vector 
+     * back into Java objects entirely.
+     */
+    @Query(value = "SELECT content FROM resume_chunks " +
+                   "ORDER BY embedding <-> CAST(:queryEmbedding AS vector) " +
+                   "LIMIT :limit", 
+           nativeQuery = true)
+    List<String> findSimilarContent(@Param("queryEmbedding") float[] queryEmbedding, 
+                                    @Param("limit") int limit);
 }

@@ -44,14 +44,17 @@ services:
     container_name: ollama_provisioner
     depends_on:
       - ollama
-    # This script waits for Ollama to be ready, then tells it to pull the models
     command: >
       sh -c "
-      echo 'Waiting for Ollama to start...';
-      sleep 10;
-      curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"llama3.2\"}';
-      curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"nomic-embed-text\"}';
-      echo 'Models pulled successfully!';"
+      echo 'Waiting for Ollama...';
+      until curl -s http://rag_ollama:11434/api/tags > /dev/null; do
+        echo 'Ollama is not ready yet... sleeping';
+        sleep 5;
+      done;
+      echo 'Ollama is up! Pulling models...';
+      curl -X POST http://rag_ollama:11434/api/pull -d '{\"name\": \"llama3.2\"}';
+      curl -X POST http://rag_ollama:11434/api/pull -d '{\"name\": \"nomic-embed-text\"}';
+      echo 'Provisioning complete!';"
   
   # vllm:
   #   image: vllm/vllm-openai:latest

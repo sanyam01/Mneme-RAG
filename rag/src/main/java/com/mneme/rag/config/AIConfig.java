@@ -21,7 +21,7 @@ public class AiConfig {
     return OllamaChatModel.builder()
         .baseUrl(ollamaBaseUrl)
         .modelName("llama3.2") // Hardcoding for now, we can move to YAML later
-        .timeout(Duration.ofSeconds(60))
+        .timeout(Duration.ofMinutes(3))
         .build();
   }
 

@@ -50,7 +50,11 @@ public class IngestionService {
                 .embedding(vector)
                 .build();
 
-        repository.save(chunk);
+        repository.insertChunk(
+    segment.text(), 
+    file.getOriginalFilename(), 
+    vector
+);
       }
     } finally {
       Files.deleteIfExists(tempFile); // Clean up temp file
