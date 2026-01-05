@@ -24,12 +24,13 @@ public class ChatService {
     public String chat(String userQuestion) {
         // 1. Convert user question to a vector
         // This uses your nomic-embed-text model
-        float[] queryVector = embeddingModel.embed(userQuestion).content().vector();
+        String searchInput = "search_query: " + userQuestion;
+        float[] queryVector = embeddingModel.embed(searchInput).content().vector();
 
         // 2. Retrieve top 5 most relevant TEXT CHUNKS only (Safe Method)
         // We use findSimilarContent because it returns List<String>.
         // This avoids fetching the 'vector' column which causes the Hibernate mapping crash.
-        List<String> topChunksContent = repository.findSimilarContent(queryVector, 5);
+        List<String> topChunksContent = repository.findSimilarContent(queryVector, 10);
 
         // 3. Handle case where no context is found
         if (topChunksContent.isEmpty()) {

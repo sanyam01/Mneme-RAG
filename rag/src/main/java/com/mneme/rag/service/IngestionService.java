@@ -33,8 +33,18 @@ public class IngestionService {
       Document document =
           FileSystemDocumentLoader.loadDocument(tempFile, new ApacheTikaDocumentParser());
 
+          // DEBUG 1: Check if "Spring Boot" exists in the raw text at all
+        String rawText = document.text();
+        System.out.println("--- RAW PDF TEXT START ---");
+        System.out.println(rawText);
+        System.out.println("--- RAW PDF TEXT END ---");
+
+        if (!rawText.toLowerCase().contains("springboot")) {
+            System.err.println("CRITICAL: 'Spring Boot' not found in raw PDF extraction!");
+        }
+
       // 3. Split Text into manageable Chunks (300 chars with 30 char overlap)
-      var splitter = DocumentSplitters.recursive(300, 30);
+      var splitter = DocumentSplitters.recursive(1000, 30);
       List<TextSegment> segments = splitter.split(document);
 
       // 4. For each chunk: Embed it and Save to Postgres

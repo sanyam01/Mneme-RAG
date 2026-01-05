@@ -48,4 +48,12 @@ public interface ResumeRepository extends JpaRepository<ResumeChunk, Long> {
            nativeQuery = true)
     List<String> findSimilarContent(@Param("queryEmbedding") float[] queryEmbedding, 
                                     @Param("limit") int limit);
+    
+//     @Query(value = "SELECT content FROM resume_chunks " +
+//                "WHERE content ILIKE %:keyword% " + // Keyword filter
+//                "ORDER BY embedding <-> CAST(:queryVector AS vector) " +
+//                "LIMIT :limit", nativeQuery = true)
+// List<String> findSimilarContentWithKeyword(@Param("queryVector") float[] queryVector, 
+//                                             @Param("keyword") String keyword, 
+//                                             @Param("limit") int limit);
 }
